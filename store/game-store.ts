@@ -54,6 +54,7 @@ interface GameState {
 
   // Building/placement
   showGrid: boolean;
+  showHitboxes: boolean;
   buildMode: boolean;
   selectedMaterial: MaterialId;
   selectedPieceId: PieceId;
@@ -73,6 +74,7 @@ interface GameState {
   toggleDebugPanel: () => void;
   updateConfig: (updates: Partial<GameConfig>) => void;
   setShowGrid: (show: boolean) => void;
+  setShowHitboxes: (show: boolean) => void;
   toggleBuildMode: () => void;
   setBuildMode: (enabled: boolean) => void;
   setSelectedMaterial: (material: MaterialId) => void;
@@ -107,6 +109,7 @@ export const useGameStore = create<GameState>((set) => ({
   config: CONFIG,
 
   showGrid: true,
+  showHitboxes: false,
   buildMode: false,
   selectedMaterial: "wood",
   selectedPieceId: "unit",
@@ -168,6 +171,8 @@ export const useGameStore = create<GameState>((set) => ({
     })),
 
   setShowGrid: (show) => set({ showGrid: show }),
+
+  setShowHitboxes: (show) => set({ showHitboxes: show }),
 
   toggleBuildMode: () => set((state) => ({ buildMode: !state.buildMode })),
 

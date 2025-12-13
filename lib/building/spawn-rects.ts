@@ -7,6 +7,8 @@ import { PlayerTeam } from "@/store/game-store";
 
 const { Bodies } = Matter;
 
+const mod = (n: number, m: number) => ((n % m) + m) % m;
+
 export const spawnRectBody = ({
   worldX,
   worldY,
@@ -51,17 +53,17 @@ export const spawnRectBody = ({
     const seed = worldX * 1000 + worldY;
     let seedValue = seed;
     for (let i = 0; i < 8; i++) {
-      seedValue = (seedValue * 9301 + 49297) % 233280;
+      seedValue = mod(seedValue * 9301 + 49297, 233280);
       const r1 = seedValue / 233280;
-      seedValue = (seedValue * 9301 + 49297) % 233280;
+      seedValue = mod(seedValue * 9301 + 49297, 233280);
       const r2 = seedValue / 233280;
-      seedValue = (seedValue * 9301 + 49297) % 233280;
+      seedValue = mod(seedValue * 9301 + 49297, 233280);
       const r3 = seedValue / 233280;
 
       textureSpots.push({
         x: (r1 - 0.5) * worldW * 0.8,
         y: (r2 - 0.5) * worldH * 0.8,
-        size: 2 + r3 * 3,
+        size: Math.max(0.25, 2 + r3 * 3),
       });
     }
     body.stoneTexture = textureSpots;

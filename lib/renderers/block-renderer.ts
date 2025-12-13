@@ -2,6 +2,7 @@ import Matter from "matter-js";
 import { useEngineStore } from "@/store/engine-store";
 import { useGameStore } from "@/store/game-store";
 import { BlockBody, isBlockBody } from "@/types/matter";
+import { generateCrackPattern, renderCrackSegments } from "./crack-generator";
 
 const { Composite } = Matter;
 
@@ -184,7 +185,8 @@ const renderStoneTexture = (
   if (textureSpots) {
     textureSpots.forEach((spot: { x: number; y: number; size: number }) => {
       ctx.beginPath();
-      ctx.arc(spot.x, spot.y, spot.size, 0, Math.PI * 2);
+      const r = Number.isFinite(spot.size) ? Math.max(0.25, spot.size) : 0.25;
+      ctx.arc(spot.x, spot.y, r, 0, Math.PI * 2);
       ctx.fill();
     });
   }
@@ -197,32 +199,13 @@ const renderBlockCracks = (ctx: CanvasRenderingContext2D, body: BlockBody) => {
   const healthRatio = body.health / body.maxHealth;
   if (healthRatio >= 1) return;
 
+  const crackSegments = generateCrackPattern(body, healthRatio);
+
   if (body.label === "steel" || body.label === "stone") {
-    ctx.strokeStyle = "#1a1a1a";
+    renderCrackSegments(ctx, crackSegments, "#1a1a1a", 1.5);
   } else {
-    ctx.strokeStyle = "#5c4033";
+    renderCrackSegments(ctx, crackSegments, "#5c4033", 1.5);
   }
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-
-  const b = body.bounds;
-  const w = b.max.x - b.min.x;
-  const h = b.max.y - b.min.y;
-
-  if (healthRatio < 0.8) {
-    ctx.moveTo(-w / 4, -h / 4);
-    ctx.lineTo(0, 0);
-  }
-  if (healthRatio < 0.5) {
-    ctx.moveTo(w / 3, h / 3);
-    ctx.lineTo(0, 0);
-    ctx.lineTo(-w / 3, h / 4);
-  }
-  if (healthRatio < 0.3) {
-    ctx.moveTo(-w / 3, -h / 3);
-    ctx.lineTo(-w / 2, 0);
-  }
-  ctx.stroke();
 };
 
 const renderGlassCracks = (ctx: CanvasRenderingContext2D, body: BlockBody) => {
@@ -231,26 +214,6 @@ const renderGlassCracks = (ctx: CanvasRenderingContext2D, body: BlockBody) => {
   const healthRatio = body.health / body.maxHealth;
   if (healthRatio >= 1) return;
 
-  const b = body.bounds;
-  const w = b.max.x - b.min.x;
-  const h = b.max.y - b.min.y;
-
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-
-  if (healthRatio < 0.8) {
-    ctx.moveTo(-w / 4, -h / 4);
-    ctx.lineTo(0, 0);
-  }
-  if (healthRatio < 0.5) {
-    ctx.moveTo(w / 3, h / 3);
-    ctx.lineTo(0, 0);
-    ctx.lineTo(-w / 3, h / 4);
-  }
-  if (healthRatio < 0.3) {
-    ctx.moveTo(-w / 3, -h / 3);
-    ctx.lineTo(-w / 2, 0);
-  }
-  ctx.stroke();
+  const crackSegments = generateCrackPattern(body, healthRatio);
+  renderCrackSegments(ctx, crackSegments, "rgba(255, 255, 255, 0.9)", 1.5);
 };

@@ -32,10 +32,10 @@ export interface GameConfig {
 }
 
 export const CONFIG = {
-  blockSize: 40,
-  groundHeight: 50,
-  soldierRadius: 15,
-  projectileRadius: 10,
+  blockSize: 24,
+  groundHeight: 32,
+  soldierRadius: 9,
+  projectileRadius: 6,
   physicsSpeed: 0.3,
   velocityMultiplier: 0.18,
   maxSpeed: 50,

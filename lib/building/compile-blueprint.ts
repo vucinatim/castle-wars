@@ -1,4 +1,4 @@
-import { BlueprintToken, GridRect } from "./types";
+import { GridRect } from "./types";
 import { EMPTY_CELL, normalizeBlueprintRows, tokenToMaterial } from "./blueprint-utils";
 
 type CellMat = ReturnType<typeof tokenToMaterial>;
@@ -8,51 +8,50 @@ export const compileBlueprintToRects = (rows: readonly string[]): GridRect[] => 
   const height = normalized.length;
   const width = normalized[0]?.length ?? 0;
 
-  const visited: boolean[][] = Array.from({ length: height }, () =>
-    Array.from({ length: width }, () => false)
-  );
-
   const materialAt = (x: number, y: number): CellMat => {
-    const ch = (normalized[y]?.[x] ?? EMPTY_CELL) as BlueprintToken;
+    const ch = normalized[y]?.[x] ?? EMPTY_CELL;
     return tokenToMaterial(ch);
   };
 
-  const rects: GridRect[] = [];
+  // Horizontal-priority tiling:
+  // 1) Create horizontal runs per row (height=1 rects).
+  // 2) Merge vertically only when identical runs stack across rows.
+  const output: GridRect[] = [];
+  let activeByKey = new Map<string, GridRect>();
+
+  const runKey = (x: number, w: number, material: NonNullable<CellMat>) =>
+    `${x}:${w}:${material}`;
 
   for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      if (visited[y]?.[x]) continue;
+    const nextActive = new Map<string, GridRect>();
+
+    let x = 0;
+    while (x < width) {
       const mat = materialAt(x, y);
       if (!mat) {
-        visited[y][x] = true;
+        x += 1;
         continue;
       }
 
       let w = 1;
-      while (x + w < width) {
-        if (visited[y][x + w]) break;
-        if (materialAt(x + w, y) !== mat) break;
-        w += 1;
+      while (x + w < width && materialAt(x + w, y) === mat) w += 1;
+
+      const key = runKey(x, w, mat);
+      const prev = activeByKey.get(key);
+      if (prev && prev.y + prev.h === y) {
+        prev.h += 1;
+        nextActive.set(key, prev);
+      } else {
+        const rect: GridRect = { x, y, w, h: 1, material: mat };
+        nextActive.set(key, rect);
+        output.push(rect);
       }
 
-      let h = 1;
-      outer: while (y + h < height) {
-        for (let xx = 0; xx < w; xx += 1) {
-          if (visited[y + h][x + xx]) break outer;
-          if (materialAt(x + xx, y + h) !== mat) break outer;
-        }
-        h += 1;
-      }
-
-      for (let yy = 0; yy < h; yy += 1) {
-        for (let xx = 0; xx < w; xx += 1) {
-          visited[y + yy][x + xx] = true;
-        }
-      }
-
-      rects.push({ x, y, w, h, material: mat });
+      x += w;
     }
+
+    activeByKey = nextActive;
   }
 
-  return rects;
+  return output;
 };

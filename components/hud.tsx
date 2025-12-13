@@ -1,9 +1,18 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useGameStore } from "@/store/game-store";
 
 export default function HUD() {
   const currentPlayer = useGameStore((state) => state.currentPlayer);
+  const buildMode = useGameStore((state) => state.buildMode);
+  const setBuildMode = useGameStore((state) => state.setBuildMode);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (buildMode) router.push("/build");
+  }, [buildMode, router]);
 
   return (
     <div className="absolute top-5 left-0 w-full text-center pointer-events-none z-10">
@@ -49,6 +58,16 @@ export default function HUD() {
           className="pointer-events-auto mt-2.5 bg-white/20 border-none text-white px-4 py-1.5 rounded text-xs cursor-pointer hover:bg-white/40 transition-colors"
         >
           Reset Game (R)
+        </button>
+
+        <button
+          onClick={() => {
+            setBuildMode(true);
+            router.push("/build");
+          }}
+          className="pointer-events-auto mt-2 bg-cyan-500/20 border border-cyan-200/20 text-white px-4 py-1.5 rounded text-xs cursor-pointer hover:bg-cyan-500/30 transition-colors"
+        >
+          Open Builder
         </button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 export type MaterialId = "wood" | "steel" | "stone" | "glass";
 
-export type BlueprintToken = "-" | "w" | "t" | "s" | "g";
+export type BlueprintToken = "-" | "w" | "t" | "s" | "g" | "p";
 
 export type Blueprint = {
   rows: readonly string[];

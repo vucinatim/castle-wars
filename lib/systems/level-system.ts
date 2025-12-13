@@ -3,12 +3,15 @@ import { useEngineStore } from "@/store/engine-store";
 import { useGameStore, PlayerTeam } from "@/store/game-store";
 import { CAT } from "@/lib/constants";
 import { SoldierBody } from "@/types/matter";
-import { createGridSpec, cellToWorldCenter } from "@/lib/grid/grid";
-import { compileBlueprintToRects } from "@/lib/building/compile-blueprint";
 import {
-  CASTLE_BLUEPRINT,
-  CASTLE_SOLDIER_SPAWNS,
-} from "@/lib/building/blueprints/castle-blueprint";
+  createGridSpec,
+  cellToWorldCenter,
+  getGridCols,
+  getGridRows,
+} from "@/lib/grid/grid";
+import { compileBlueprintToRects } from "@/lib/building/compile-blueprint";
+import { CASTLE_BLUEPRINT } from "@/lib/building/blueprints/castle-blueprint";
+import { getSoldierSpawnCells } from "@/lib/building/blueprint-utils";
 import { translateRects } from "@/lib/building/translate-blueprint";
 import { worldifyRects } from "@/lib/building/worldify-rects";
 import { getTeamCollision, spawnRectBody } from "@/lib/building/spawn-rects";
@@ -83,8 +86,15 @@ export const buildCastle = (
 
   const anchorXCell = Math.round(centerX / config.blockSize - 0.5);
   const anchorBottomYCell = Math.floor(groundY / config.blockSize) - 1;
-  const topLeftCellX = anchorXCell - Math.floor(bpW / 2);
-  const topLeftCellY = anchorBottomYCell - (bpH - 1);
+  const cols = getGridCols(grid);
+  const rows = getGridRows(grid);
+
+  const unclampedTopLeftX = anchorXCell - Math.floor(bpW / 2);
+  const unclampedTopLeftY = anchorBottomYCell - (bpH - 1);
+  const topLeftCellX =
+    bpW <= cols ? Math.max(0, Math.min(cols - bpW, unclampedTopLeftX)) : 0;
+  const topLeftCellY =
+    bpH <= rows ? Math.max(0, Math.min(rows - bpH, unclampedTopLeftY)) : 0;
 
   const rectsLocal = compileBlueprintToRects(bpRows);
   const rectsGlobal = translateRects(rectsLocal, topLeftCellX, topLeftCellY);
@@ -109,7 +119,8 @@ export const buildCastle = (
     );
   }
 
-  for (const spawn of CASTLE_SOLDIER_SPAWNS) {
+  const localSpawns = getSoldierSpawnCells(bpRows);
+  for (const spawn of localSpawns) {
     const cell = { x: topLeftCellX + spawn.x, y: topLeftCellY + spawn.y };
     const pos = cellToWorldCenter(grid, cell);
     bodies.push(createSoldier(pos.x, pos.y));
