@@ -1,11 +1,6 @@
 import Matter from "matter-js";
 import { useEngineStore } from "@/store/engine-store";
-import {
-  useGameStore,
-  FloatingText,
-  InputState,
-  GameConfig,
-} from "@/store/game-store";
+import { useGameStore } from "@/store/game-store";
 
 const { Engine, Bodies, Body, Composite } = Matter;
 
@@ -94,7 +89,7 @@ export const renderAimingLine = (
   for (let i = 0; i < simulationSteps; i++) {
     Engine.update(ghostEngine, simulationDelta);
     ctx.lineTo(ghostBall.position.x, ghostBall.position.y);
-    if (ghostBall.position.y > height - 25) break;
+    if (ghostBall.position.y > height - config.groundHeight / 2) break;
   }
 
   ctx.stroke();

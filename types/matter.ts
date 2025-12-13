@@ -6,6 +6,7 @@ declare module "matter-js" {
     health?: number;
     maxHealth?: number;
     team?: PlayerTeam;
+    gridCells?: Array<{ x: number; y: number }>;
   }
 
   interface IBodyRenderOptions {
@@ -17,12 +18,14 @@ declare module "matter-js" {
     team?: PlayerTeam;
     health?: number;
     maxHealth?: number;
+    gridCells?: Array<{ x: number; y: number }>;
   }
 
   interface IChamferableBodyDefinition {
     team?: PlayerTeam;
     health?: number;
     maxHealth?: number;
+    gridCells?: Array<{ x: number; y: number }>;
   }
 }
 
@@ -31,6 +34,7 @@ export type GameBody = Matter.Body & {
   health?: number;
   maxHealth?: number;
   team?: PlayerTeam;
+  gridCells?: Array<{ x: number; y: number }>;
   render?: Matter.IBodyRenderOptions & {
     fillStyle?: string;
     strokeStyle?: string;

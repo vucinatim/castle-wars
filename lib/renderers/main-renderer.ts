@@ -3,6 +3,8 @@ import { getCurrentSoldier } from "@/lib/systems/projectile-system";
 import { renderSky, renderClouds } from "./sky-renderer";
 import { renderGround } from "./ground-renderer";
 import { renderBlocks, renderGlassBlocks } from "./block-renderer";
+import { renderGrid } from "./grid-renderer";
+import { renderPlacementPreview } from "./placement-preview-renderer";
 import {
   renderSoldiers,
   renderActiveSoldierHighlight,
@@ -21,7 +23,8 @@ export const render = (
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement
 ) => {
-  const { input, currentPlayer } = useGameStore.getState();
+  const { input, currentPlayer, debugPanelOpen, showGrid } =
+    useGameStore.getState();
 
   // Background
   renderSky(ctx, canvas);
@@ -35,6 +38,14 @@ export const render = (
 
   // Environment
   renderGround(ctx);
+
+  // Debug overlays
+  if (debugPanelOpen && showGrid) {
+    renderGrid(ctx, canvas);
+  }
+
+  // Building preview
+  renderPlacementPreview(ctx);
 
   // Game objects (order matters for layering)
   renderBlocks(ctx);

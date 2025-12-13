@@ -1,5 +1,6 @@
 export interface GameConfig {
   blockSize: number;
+  groundHeight: number;
   soldierRadius: number;
   projectileRadius: number;
   physicsSpeed: number;
@@ -32,6 +33,7 @@ export interface GameConfig {
 
 export const CONFIG = {
   blockSize: 40,
+  groundHeight: 50,
   soldierRadius: 15,
   projectileRadius: 10,
   physicsSpeed: 0.3,

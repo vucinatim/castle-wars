@@ -2,6 +2,7 @@
 
 import { useGameStore } from "@/store/game-store";
 import { GameConfig } from "@/lib/constants";
+import { PIECES } from "@/lib/building/registry";
 
 type DebugKeyItem = {
   key: keyof GameConfig;
@@ -16,6 +17,16 @@ export default function DebugPanel() {
   const config = useGameStore((state) => state.config);
   const updateConfig = useGameStore((state) => state.updateConfig);
   const toggleDebugPanel = useGameStore((state) => state.toggleDebugPanel);
+  const showGrid = useGameStore((state) => state.showGrid);
+  const setShowGrid = useGameStore((state) => state.setShowGrid);
+  const buildMode = useGameStore((state) => state.buildMode);
+  const setBuildMode = useGameStore((state) => state.setBuildMode);
+  const selectedMaterial = useGameStore((state) => state.selectedMaterial);
+  const setSelectedMaterial = useGameStore((state) => state.setSelectedMaterial);
+  const selectedPieceId = useGameStore((state) => state.selectedPieceId);
+  const setSelectedPieceId = useGameStore((state) => state.setSelectedPieceId);
+  const selectedRotation = useGameStore((state) => state.selectedRotation);
+  const rotateSelectedPiece = useGameStore((state) => state.rotateSelectedPiece);
 
   const debugKeys = [
     { key: "physicsSpeed", label: "Time Scale", step: 0.1, min: 0.1, max: 2.0 },
@@ -125,6 +136,83 @@ export default function DebugPanel() {
               />
             </div>
           ))}
+        </div>
+
+        <div className="mt-4 border-t border-gray-800 pt-3">
+          <h4 className="m-0 mb-2 text-[11px] uppercase tracking-wider text-cyan-200">
+            Building
+          </h4>
+
+          <label className="mb-2 flex items-center justify-between gap-2">
+            <span className="text-gray-400 flex-1">Show Grid</span>
+            <input
+              type="checkbox"
+              checked={showGrid}
+              onChange={(e) => setShowGrid(e.target.checked)}
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+            />
+          </label>
+
+          <label className="mb-2 flex items-center justify-between gap-2">
+            <span className="text-gray-400 flex-1">Build Mode (B)</span>
+            <input
+              type="checkbox"
+              checked={buildMode}
+              onChange={(e) => setBuildMode(e.target.checked)}
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+            />
+          </label>
+
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <span className="text-gray-400 flex-1">Material</span>
+            <select
+              value={selectedMaterial}
+              onChange={(e) =>
+                setSelectedMaterial(e.target.value as typeof selectedMaterial)
+              }
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              className="bg-gray-800 border border-gray-600 text-white px-2 py-1 rounded text-right font-mono focus:outline-none focus:border-cyan-400 focus:bg-gray-700"
+            >
+              <option value="wood">Wood</option>
+              <option value="stone">Stone</option>
+              <option value="steel">Steel</option>
+              <option value="glass">Glass</option>
+            </select>
+          </div>
+
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <span className="text-gray-400 flex-1">Piece</span>
+            <select
+              value={selectedPieceId}
+              onChange={(e) =>
+                setSelectedPieceId(e.target.value as typeof selectedPieceId)
+              }
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              className="bg-gray-800 border border-gray-600 text-white px-2 py-1 rounded text-right font-mono focus:outline-none focus:border-cyan-400 focus:bg-gray-700"
+            >
+              {Object.values(PIECES).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-gray-400 flex-1">Rotation</span>
+            <button
+              onClick={() => rotateSelectedPiece()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              className="bg-gray-800 border border-gray-600 text-white px-2 py-1 rounded font-mono hover:bg-gray-700"
+            >
+              {selectedRotation}°
+            </button>
+          </div>
         </div>
         <div className="mt-4 text-[10px] text-gray-600 leading-snug border-t border-gray-800 pt-2.5">
           • Physics/Damage updates apply instantly.

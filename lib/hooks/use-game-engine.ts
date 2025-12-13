@@ -74,6 +74,13 @@ export const useGameEngine = () => {
         resetLevel();
         resetGame();
       }
+      if (e.key === "b" || e.key === "B") {
+        useGameStore.getState().toggleBuildMode();
+      }
+      if (e.key === "g" || e.key === "G") {
+        const store = useGameStore.getState();
+        store.setShowGrid(!store.showGrid);
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
 

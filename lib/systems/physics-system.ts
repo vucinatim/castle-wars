@@ -45,6 +45,9 @@ export const cleanupDeadBodies = () => {
   for (let i = 0; i < bodies.length; i++) {
     const b = bodies[i];
     if (isBlockBody(b) && b.health <= 0) {
+      if (b.gridCells) {
+        useGameStore.getState().freeCells(b.gridCells);
+      }
       Composite.remove(engine.world, b);
     }
   }

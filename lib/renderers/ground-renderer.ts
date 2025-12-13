@@ -16,7 +16,7 @@ export const renderGround = (ctx: CanvasRenderingContext2D) => {
     ctx.translate(ground.position.x, ground.position.y);
     ctx.fillStyle = config.colors.ground;
     const w = width;
-    const h = 50;
+    const h = config.groundHeight;
     ctx.fillRect(-w / 2, -h / 2, w, h);
     ctx.fillStyle = config.colors.groundDark;
     ctx.fillRect(-w / 2, -h / 2, w, 5);

@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { CONFIG, GameConfig } from "@/lib/constants";
+import { GridCell } from "@/lib/grid/grid";
+import { MaterialId, PieceId, Rotation } from "@/lib/building/types";
 
 export interface InputState {
   isDragging: boolean;
@@ -50,6 +52,15 @@ interface GameState {
   debugPanelOpen: boolean;
   config: GameConfig;
 
+  // Building/placement
+  showGrid: boolean;
+  buildMode: boolean;
+  selectedMaterial: MaterialId;
+  selectedPieceId: PieceId;
+  selectedRotation: Rotation;
+  hoverCell: GridCell | null;
+  occupiedCells: Record<string, { material: MaterialId; team: PlayerTeam }>;
+
   // Actions
   setDimensions: (width: number, height: number) => void;
   setInput: (input: Partial<InputState>) => void;
@@ -61,6 +72,21 @@ interface GameState {
   updateFloatingTexts: () => void;
   toggleDebugPanel: () => void;
   updateConfig: (updates: Partial<GameConfig>) => void;
+  setShowGrid: (show: boolean) => void;
+  toggleBuildMode: () => void;
+  setBuildMode: (enabled: boolean) => void;
+  setSelectedMaterial: (material: MaterialId) => void;
+  setSelectedPieceId: (pieceId: PieceId) => void;
+  rotateSelectedPiece: () => void;
+  setHoverCell: (cell: GridCell | null) => void;
+  setOccupiedCells: (
+    cells: Record<string, { material: MaterialId; team: PlayerTeam }>
+  ) => void;
+  occupyCells: (
+    cells: Array<{ x: number; y: number }>,
+    entry: { material: MaterialId; team: PlayerTeam }
+  ) => void;
+  freeCells: (cells: Array<{ x: number; y: number }>) => void;
   resetGame: () => void;
 }
 
@@ -79,6 +105,14 @@ export const useGameStore = create<GameState>((set) => ({
   floatingTexts: [],
   debugPanelOpen: false,
   config: CONFIG,
+
+  showGrid: true,
+  buildMode: false,
+  selectedMaterial: "wood",
+  selectedPieceId: "unit",
+  selectedRotation: 0,
+  hoverCell: null,
+  occupiedCells: {},
 
   setDimensions: (width, height) => set({ width, height }),
 
@@ -133,10 +167,49 @@ export const useGameStore = create<GameState>((set) => ({
       config: { ...state.config, ...updates },
     })),
 
+  setShowGrid: (show) => set({ showGrid: show }),
+
+  toggleBuildMode: () => set((state) => ({ buildMode: !state.buildMode })),
+
+  setBuildMode: (enabled) => set({ buildMode: enabled }),
+
+  setSelectedMaterial: (material) => set({ selectedMaterial: material }),
+
+  setSelectedPieceId: (pieceId) => set({ selectedPieceId: pieceId }),
+
+  rotateSelectedPiece: () =>
+    set((state) => ({
+      selectedRotation: ((state.selectedRotation + 90) % 360) as Rotation,
+    })),
+
+  setHoverCell: (cell) => set({ hoverCell: cell }),
+
+  setOccupiedCells: (cells) => set({ occupiedCells: cells }),
+
+  occupyCells: (cells, entry) =>
+    set((state) => {
+      const next = { ...state.occupiedCells };
+      for (const cell of cells) {
+        next[`${cell.x},${cell.y}`] = entry;
+      }
+      return { occupiedCells: next };
+    }),
+
+  freeCells: (cells) =>
+    set((state) => {
+      const next = { ...state.occupiedCells };
+      for (const cell of cells) {
+        delete next[`${cell.x},${cell.y}`];
+      }
+      return { occupiedCells: next };
+    }),
+
   resetGame: () =>
     set({
       currentPlayer: "red",
       floatingTexts: [],
+      buildMode: false,
+      hoverCell: null,
       input: {
         isDragging: false,
         startX: 0,

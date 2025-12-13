@@ -1,6 +1,6 @@
 import Matter from "matter-js";
 import { useEngineStore } from "@/store/engine-store";
-import { useGameStore, PlayerTeam } from "@/store/game-store";
+import { useGameStore } from "@/store/game-store";
 import { isSoldierBody, SoldierBody } from "@/types/matter";
 
 const { Composite } = Matter;
