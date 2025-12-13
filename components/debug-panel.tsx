@@ -22,11 +22,15 @@ export default function DebugPanel() {
   const buildMode = useGameStore((state) => state.buildMode);
   const setBuildMode = useGameStore((state) => state.setBuildMode);
   const selectedMaterial = useGameStore((state) => state.selectedMaterial);
-  const setSelectedMaterial = useGameStore((state) => state.setSelectedMaterial);
+  const setSelectedMaterial = useGameStore(
+    (state) => state.setSelectedMaterial
+  );
   const selectedPieceId = useGameStore((state) => state.selectedPieceId);
   const setSelectedPieceId = useGameStore((state) => state.setSelectedPieceId);
   const selectedRotation = useGameStore((state) => state.selectedRotation);
-  const rotateSelectedPiece = useGameStore((state) => state.rotateSelectedPiece);
+  const rotateSelectedPiece = useGameStore(
+    (state) => state.rotateSelectedPiece
+  );
 
   const debugKeys = [
     { key: "physicsSpeed", label: "Time Scale", step: 0.1, min: 0.1, max: 2.0 },

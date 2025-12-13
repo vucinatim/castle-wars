@@ -116,7 +116,9 @@ export const buildCastle = (
   }
 
   for (const r of placedRects) {
-    useGameStore.getState().occupyCells(r.gridCells, { material: r.material, team });
+    useGameStore
+      .getState()
+      .occupyCells(r.gridCells, { material: r.material, team });
   }
 
   Composite.add(engine.world, bodies);

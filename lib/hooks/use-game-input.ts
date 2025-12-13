@@ -21,7 +21,11 @@ export const useGameInput = (
 
     const updateHover = (x: number, y: number) => {
       const store = useGameStore.getState();
-      const grid = createGridSpec(store.width, store.height, store.config.blockSize);
+      const grid = createGridSpec(
+        store.width,
+        store.height,
+        store.config.blockSize
+      );
       store.setHoverCell(worldToCell(grid, { x, y }));
     };
 
@@ -106,7 +110,8 @@ export const useGameInput = (
       e.preventDefault();
       const store = useGameStore.getState();
       if (store.buildMode) {
-        if (e.touches[0]) updateHover(e.touches[0].clientX, e.touches[0].clientY);
+        if (e.touches[0])
+          updateHover(e.touches[0].clientX, e.touches[0].clientY);
         return;
       }
       if (store.input.isDragging && e.touches[0]) {
