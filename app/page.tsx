@@ -1,7 +1,7 @@
-import GameCanvas from "@/components/GameCanvas";
-import HUD from "@/components/HUD";
-import DebugPanel from "@/components/DebugPanel";
-import DebugToggle from "@/components/DebugToggle";
+import GameCanvas from "@/components/game-canvas";
+import HUD from "@/components/hud";
+import DebugPanel from "@/components/debug-panel";
+import DebugToggle from "@/components/debug-toggle";
 
 export default function Home() {
   return (

@@ -1,4 +1,4 @@
-import { PlayerTeam } from "@/store/gameStore";
+import { PlayerTeam } from "@/store/game-store";
 import Matter from "matter-js";
 
 declare module "matter-js" {
@@ -65,7 +65,12 @@ export type GroundBody = GameBody & {
 
 // Type guards
 export function isBlockBody(body: Matter.Body): body is BlockBody {
-  return body.label === "block" || body.label === "steel" || body.label === "stone" || body.label === "glass";
+  return (
+    body.label === "block" ||
+    body.label === "steel" ||
+    body.label === "stone" ||
+    body.label === "glass"
+  );
 }
 
 export function isSoldierBody(body: Matter.Body): body is SoldierBody {

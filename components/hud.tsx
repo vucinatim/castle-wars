@@ -1,6 +1,6 @@
 "use client";
 
-import { useGameStore } from "@/store/gameStore";
+import { useGameStore } from "@/store/game-store";
 
 export default function HUD() {
   const currentPlayer = useGameStore((state) => state.currentPlayer);

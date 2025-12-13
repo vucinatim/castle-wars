@@ -1,6 +1,6 @@
 "use client";
 
-import { useGameStore } from "@/store/gameStore";
+import { useGameStore } from "@/store/game-store";
 
 export default function DebugToggle() {
   const toggleDebugPanel = useGameStore((state) => state.toggleDebugPanel);
