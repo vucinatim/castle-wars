@@ -56,7 +56,9 @@ export default function BuildSidebar() {
 
   const [exportOpen, setExportOpen] = useState(false);
 
-  const blueprintText = useBuildStore((s) => s.exportBlueprintRows().join("\n"));
+  const blueprintText = useBuildStore((s) =>
+    s.exportBlueprintRowsTrimmed().join("\n")
+  );
   const blueprintTs = useMemo(
     () =>
       `blueprintFromText(\`\n${blueprintText}\n\`)`,

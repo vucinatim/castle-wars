@@ -102,6 +102,13 @@ export default function BuildCanvas() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
+    // Shade the "below ground" area so it's obvious it won't export/place in-game.
+    const groundTopY = canvas.height - config.groundHeight;
+    ctx.save();
+    ctx.fillStyle = "rgba(0,0,0,0.35)";
+    ctx.fillRect(0, groundTopY, canvas.width, canvas.height - groundTopY);
+    ctx.restore();
+
     const drawSpawnMarker = (cx: number, cy: number) => {
       const r = Math.max(6, Math.min(14, cellSize * 0.22));
       ctx.save();
@@ -406,6 +413,13 @@ export default function BuildCanvas() {
 
     const applyToolAt = (x: number, y: number) => {
       if (x < 0 || y < 0 || x >= cols || y >= rows) return;
+      // Disallow editing into the ground band (matches in-game ground top).
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const groundTopY = canvas.height - config.groundHeight;
+        const cellBottomY = (y + 1) * cellSize;
+        if (cellBottomY > groundTopY) return;
+      }
       if (tool === "select") return;
       if (tool === "erase") clearCell(x, y);
       else if (tool === "soldier") toggleSpawn(x, y);
@@ -493,6 +507,7 @@ export default function BuildCanvas() {
     startMoveSelection,
     updateMoveSelection,
     commitMoveSelection,
+    config.groundHeight,
   ]);
 
   return (

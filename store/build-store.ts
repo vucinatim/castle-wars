@@ -45,6 +45,7 @@ type BuildState = {
   clearAll: () => void;
   loadCastleTemplateCentered: () => void;
   exportBlueprintRows: () => string[];
+  exportBlueprintRowsTrimmed: () => string[];
 };
 
 const keyOf = (x: number, y: number) => `${x},${y}`;
@@ -356,6 +357,55 @@ export const useBuildStore = create<BuildState>((set, get) => ({
         else if (mat === "steel") row += "t";
         else if (mat === "stone") row += "s";
         else row += "g";
+        }
+      }
+      out.push(row);
+    }
+    return out;
+  },
+
+  exportBlueprintRowsTrimmed: () => {
+    const { cols, rows, cells, spawns } = get();
+
+    let minX = Number.POSITIVE_INFINITY;
+    let minY = Number.POSITIVE_INFINITY;
+    let maxX = Number.NEGATIVE_INFINITY;
+    let maxY = Number.NEGATIVE_INFINITY;
+
+    const visitKey = (k: string) => {
+      const [xs, ys] = k.split(",");
+      const x = Number(xs);
+      const y = Number(ys);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    };
+
+    for (const k of Object.keys(cells)) visitKey(k);
+    for (const k of Object.keys(spawns)) visitKey(k);
+
+    if (!Number.isFinite(minX) || !Number.isFinite(minY)) return [];
+
+    minX = Math.max(0, Math.min(cols - 1, minX));
+    minY = Math.max(0, Math.min(rows - 1, minY));
+    maxX = Math.max(0, Math.min(cols - 1, maxX));
+    maxY = Math.max(0, Math.min(rows - 1, maxY));
+
+    const out: string[] = [];
+    for (let y = minY; y <= maxY; y += 1) {
+      let row = "";
+      for (let x = minX; x <= maxX; x += 1) {
+        const k = keyOf(x, y);
+        if (spawns[k]) row += "p";
+        else {
+          const mat = cells[k];
+          if (!mat) row += "-";
+          else if (mat === "wood") row += "w";
+          else if (mat === "steel") row += "t";
+          else if (mat === "stone") row += "s";
+          else row += "g";
         }
       }
       out.push(row);

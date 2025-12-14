@@ -3,6 +3,7 @@ import { useEngineStore } from "@/store/engine-store";
 import { useGameStore } from "@/store/game-store";
 import { BlockBody, isBlockBody } from "@/types/matter";
 import { generateCrackPattern, renderCrackSegments } from "./crack-generator";
+import { getBodyLocalVertices, getLocalBounds, LocalBounds } from "@/lib/matter/geometry";
 
 const { Composite } = Matter;
 
@@ -27,6 +28,9 @@ export const renderBlocks = (ctx: CanvasRenderingContext2D) => {
   otherBodies.forEach((body) => {
     if (!isBlockBody(body)) return;
 
+    const localVertices = getBodyLocalVertices(body);
+    const localBounds = getLocalBounds(localVertices);
+
     ctx.save();
     ctx.translate(body.position.x, body.position.y);
     ctx.rotate(body.angle);
@@ -37,27 +41,17 @@ export const renderBlocks = (ctx: CanvasRenderingContext2D) => {
 
     // Draw shape
     ctx.beginPath();
-    const vertices = body.vertices;
-    ctx.moveTo(
-      vertices[0].x - body.position.x,
-      vertices[0].y - body.position.y
-    );
-    for (let j = 1; j < vertices.length; j += 1) {
-      ctx.lineTo(
-        vertices[j].x - body.position.x,
-        vertices[j].y - body.position.y
-      );
+    ctx.moveTo(localVertices[0].x, localVertices[0].y);
+    for (let j = 1; j < localVertices.length; j += 1) {
+      ctx.lineTo(localVertices[j].x, localVertices[j].y);
     }
-    ctx.lineTo(
-      vertices[0].x - body.position.x,
-      vertices[0].y - body.position.y
-    );
+    ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
     // Steel texture details
     if (body.label === "steel") {
-      renderSteelTexture(ctx, body, config);
+      renderSteelTexture(ctx, body, config, localBounds);
     }
 
     // Stone texture details
@@ -89,6 +83,9 @@ export const renderGlassBlocks = (ctx: CanvasRenderingContext2D) => {
   glassBodies.forEach((body) => {
     if (!isBlockBody(body)) return;
 
+    const localVertices = getBodyLocalVertices(body);
+    const localBounds = getLocalBounds(localVertices);
+
     ctx.save();
     ctx.translate(body.position.x, body.position.y);
     ctx.rotate(body.angle);
@@ -97,21 +94,11 @@ export const renderGlassBlocks = (ctx: CanvasRenderingContext2D) => {
 
     // Draw glass with transparency
     ctx.beginPath();
-    const vertices = body.vertices;
-    ctx.moveTo(
-      vertices[0].x - body.position.x,
-      vertices[0].y - body.position.y
-    );
-    for (let j = 1; j < vertices.length; j += 1) {
-      ctx.lineTo(
-        vertices[j].x - body.position.x,
-        vertices[j].y - body.position.y
-      );
+    ctx.moveTo(localVertices[0].x, localVertices[0].y);
+    for (let j = 1; j < localVertices.length; j += 1) {
+      ctx.lineTo(localVertices[j].x, localVertices[j].y);
     }
-    ctx.lineTo(
-      vertices[0].x - body.position.x,
-      vertices[0].y - body.position.y
-    );
+    ctx.closePath();
 
     ctx.globalAlpha = 0.25;
     ctx.fillStyle = renderProps.fillStyle || config.colors.glass;
@@ -123,18 +110,24 @@ export const renderGlassBlocks = (ctx: CanvasRenderingContext2D) => {
     ctx.stroke();
 
     // Glass highlight effect
-    const b = body.bounds;
-    const w = b.max.x - b.min.x;
-    const h = b.max.y - b.min.y;
+    const w = localBounds.width;
+    const h = localBounds.height;
+    const minX = localBounds.minX;
+    const minY = localBounds.minY;
 
     ctx.beginPath();
-    ctx.moveTo(-w / 2, -h / 2);
-    ctx.lineTo(w / 4, -h / 2);
-    ctx.lineTo(w / 5, h / 3);
-    ctx.lineTo(-w / 2, h / 3);
+    ctx.moveTo(minX, minY);
+    ctx.lineTo(minX + w * 0.75, minY);
+    ctx.lineTo(minX + w * 0.7, minY + h * 0.83);
+    ctx.lineTo(minX, minY + h * 0.83);
     ctx.closePath();
 
-    const gradient = ctx.createLinearGradient(-w / 2, -h / 2, w / 4, h / 3);
+    const gradient = ctx.createLinearGradient(
+      minX,
+      minY,
+      minX + w * 0.75,
+      minY + h * 0.83
+    );
     gradient.addColorStop(0, "rgba(255, 255, 255, 0.4)");
     gradient.addColorStop(0.7, "rgba(255, 255, 255, 0.1)");
     gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
@@ -151,25 +144,27 @@ export const renderGlassBlocks = (ctx: CanvasRenderingContext2D) => {
 const renderSteelTexture = (
   ctx: CanvasRenderingContext2D,
   body: BlockBody,
-  config: { colors: { steel: string } }
+  config: { colors: { steel: string } },
+  bounds: LocalBounds
 ) => {
   const renderProps = body.render || {};
   ctx.fillStyle = "rgba(0,0,0,0.3)";
-  const b = body.bounds;
-  const w = b.max.x - b.min.x;
-  const h = b.max.y - b.min.y;
+  const w = bounds.width;
+  const h = bounds.height;
+  const minX = bounds.minX;
+  const minY = bounds.minY;
   const off = 5;
   ctx.beginPath();
-  ctx.arc(-w / 2 + off, -h / 2 + off, 2, 0, Math.PI * 2);
+  ctx.arc(minX + off, minY + off, 2, 0, Math.PI * 2);
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(w / 2 - off, -h / 2 + off, 2, 0, Math.PI * 2);
+  ctx.arc(minX + w - off, minY + off, 2, 0, Math.PI * 2);
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(-w / 2 + off, h / 2 - off, 2, 0, Math.PI * 2);
+  ctx.arc(minX + off, minY + h - off, 2, 0, Math.PI * 2);
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(w / 2 - off, h / 2 - off, 2, 0, Math.PI * 2);
+  ctx.arc(minX + w - off, minY + h - off, 2, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = renderProps.fillStyle || config.colors.steel;
 };

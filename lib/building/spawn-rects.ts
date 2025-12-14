@@ -36,8 +36,10 @@ export const spawnRectBody = ({
     const body = Bodies.rectangle(worldX, worldY, worldW, worldH, {
       label,
       isStatic: true,
-      friction: 0.8,
-      restitution: 0.1,
+      friction: 0.9,
+      frictionStatic: 1.0,
+      restitution: 0.0,
+      slop: 0.05,
       density: 0.01,
       render: {
         fillStyle: config.colors.stone,
@@ -75,9 +77,12 @@ export const spawnRectBody = ({
     const body = Bodies.rectangle(worldX, worldY, worldW, worldH, {
       label,
       isStatic: false,
-      friction: 0.8,
-      restitution: 0.1,
-      density: 0.05,
+      friction: 0.6,
+      frictionStatic: 0.8,
+      frictionAir: 0.03,
+      restitution: 0.0,
+      slop: 0.05,
+      density: 0.04,
       render: {
         fillStyle: config.colors.steel,
         strokeStyle: config.colors.steelStroke,
@@ -95,9 +100,12 @@ export const spawnRectBody = ({
     const body = Bodies.rectangle(worldX, worldY, worldW, worldH, {
       label,
       isStatic: false,
-      friction: 0.05,
-      restitution: 0.8,
-      density: 0.0015,
+      friction: 0.3,
+      frictionStatic: 0.4,
+      frictionAir: 0.02,
+      restitution: 0.02,
+      slop: 0.05,
+      density: 0.003,
       render: {
         fillStyle: config.colors.glass,
         strokeStyle: config.colors.glassStroke,
@@ -115,8 +123,11 @@ export const spawnRectBody = ({
     label,
     isStatic: false,
     friction: 0.8,
-    restitution: 0.1,
-    density: 0.002,
+    frictionStatic: 0.9,
+    frictionAir: 0.04,
+    restitution: 0.0,
+    slop: 0.05,
+    density: 0.012,
     render: {
       fillStyle: config.colors.wood,
       strokeStyle: config.colors.woodStroke,

@@ -9,8 +9,12 @@ const { Engine, Composite } = Matter;
  * Creates and initializes the main physics engine
  */
 export const createEngine = (): Matter.Engine => {
-  const engine = Engine.create();
-  engine.world.gravity.y = 1.5;
+  const engine = Engine.create({ enableSleeping: false });
+  engine.gravity.y = 1.5;
+  // More solver iterations = firmer contacts under load.
+  engine.positionIterations = 12;
+  engine.velocityIterations = 10;
+  engine.constraintIterations = 4;
   return engine;
 };
 
@@ -18,8 +22,11 @@ export const createEngine = (): Matter.Engine => {
  * Creates a ghost engine for trajectory prediction
  */
 export const createGhostEngine = (): Matter.Engine => {
-  const ghostEngine = Engine.create();
-  ghostEngine.world.gravity.y = 1.5;
+  const ghostEngine = Engine.create({ enableSleeping: false });
+  ghostEngine.gravity.y = 1.5;
+  ghostEngine.positionIterations = 12;
+  ghostEngine.velocityIterations = 10;
+  ghostEngine.constraintIterations = 4;
   return ghostEngine;
 };
 

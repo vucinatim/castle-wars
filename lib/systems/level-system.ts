@@ -39,7 +39,8 @@ export const resetLevel = () => {
     {
       isStatic: true,
       label: "ground",
-      friction: 1,
+      friction: 0.9,
+      frictionStatic: 1.0,
       render: { fillStyle: config.colors.ground },
       collisionFilter: { category: CAT.GROUND, mask: -1 },
     }
@@ -47,7 +48,7 @@ export const resetLevel = () => {
   Composite.add(engine.world, ground);
 
   // Build castles
-  const padding = Math.min(400, width * 0.25);
+  const padding = Math.min(260, width * 0.15);
   buildCastle(padding, height - config.groundHeight, "red");
   buildCastle(width - padding, height - config.groundHeight, "blue");
 };
@@ -80,7 +81,10 @@ export const buildCastle = (
   const { width, height, config } = useGameStore.getState();
   const grid = createGridSpec(width, height, config.blockSize);
 
-  const bpRows = CASTLE_BLUEPRINT.rows;
+  const bpRows =
+    team === "blue"
+      ? CASTLE_BLUEPRINT.rows.map((r) => r.split("").reverse().join(""))
+      : CASTLE_BLUEPRINT.rows;
   const bpH = bpRows.length;
   const bpW = bpRows[0]?.length ?? 0;
 

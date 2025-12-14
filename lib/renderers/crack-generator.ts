@@ -1,5 +1,6 @@
 import Matter from "matter-js";
 import { BlockBody } from "@/types/matter";
+import { getBodyLocalVertices, getLocalBounds } from "@/lib/matter/geometry";
 
 /**
  * Represents a single crack segment with branching points
@@ -95,21 +96,16 @@ export const generateCrackPattern = (
 ): CrackSegment[] => {
   if (healthRatio >= 1) return [];
 
-  const b = body.bounds;
-  const w = b.max.x - b.min.x;
-  const h = b.max.y - b.min.y;
-  const centerX = (b.min.x + b.max.x) / 2 - body.position.x;
-  const centerY = (b.min.y + b.max.y) / 2 - body.position.y;
+  const localVertices = getBodyLocalVertices(body);
+  const bounds = getLocalBounds(localVertices);
+  const w = bounds.width;
+  const h = bounds.height;
+  const centerX = bounds.centerX;
+  const centerY = bounds.centerY;
 
   // Create seed from body position for consistency
   const seed = body.position.x * 1000 + body.position.y;
   let seedValue = seed;
-
-  // Transform vertices to local coordinates
-  const localVertices = body.vertices.map((v) => ({
-    x: v.x - body.position.x,
-    y: v.y - body.position.y,
-  }));
 
   const cracks: CrackSegment[] = [];
   const damageLevel = 1 - healthRatio;
@@ -136,26 +132,26 @@ export const generateCrackPattern = (
 
       switch (edge) {
         case 0: // top
-          startX = -w / 2 + edgePos * w;
-          startY = -h / 2;
+          startX = bounds.minX + edgePos * w;
+          startY = bounds.minY;
           break;
         case 1: // right
-          startX = w / 2;
-          startY = -h / 2 + edgePos * h;
+          startX = bounds.maxX;
+          startY = bounds.minY + edgePos * h;
           break;
         case 2: // bottom
-          startX = -w / 2 + edgePos * w;
-          startY = h / 2;
+          startX = bounds.minX + edgePos * w;
+          startY = bounds.maxY;
           break;
         default: // left
-          startX = -w / 2;
-          startY = -h / 2 + edgePos * h;
+          startX = bounds.minX;
+          startY = bounds.minY + edgePos * h;
           break;
       }
     } else {
       // Start from random point
-      startX = -w / 2 + r1 * w;
-      startY = -h / 2 + r2 * h;
+      startX = bounds.minX + r1 * w;
+      startY = bounds.minY + r2 * h;
     }
 
     // Ensure start is within bounds

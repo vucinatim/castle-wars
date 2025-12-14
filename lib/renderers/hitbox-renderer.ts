@@ -12,6 +12,9 @@ const { Composite } = Matter;
 /**
  * Renders Matter.js collision shapes (hitboxes) for all bodies when debug mode is enabled.
  * Uses body.vertices which represents the actual collision shape used by Matter.js physics.
+ *
+ * IMPORTANT: part.vertices are in WORLD SPACE and already account for position and rotation.
+ * Render them directly without additional transforms so visuals match physics exactly.
  */
 export const renderHitboxes = (ctx: CanvasRenderingContext2D) => {
   const engine = useEngineStore.getState().engine;
@@ -64,41 +67,35 @@ export const renderHitboxes = (ctx: CanvasRenderingContext2D) => {
     ctx.fillStyle = fillColor;
     ctx.globalAlpha = 1.0;
 
-    // Transform to body's position and rotation
-    ctx.translate(body.position.x, body.position.y);
-    ctx.rotate(body.angle);
+    // Render all parts of the body (for compound bodies)
+    // Matter.js simple bodies have body.parts = [body], so this works for both
+    const parts =
+      body.parts && body.parts.length > 1 ? body.parts.slice(1) : [body];
 
-    // Draw body outline using vertices (these are the actual collision shapes)
-    const vertices = body.vertices;
-    if (vertices && vertices.length > 0) {
-      ctx.beginPath();
+    parts.forEach((part) => {
+      const vertices = part.vertices;
+      if (vertices && vertices.length > 0) {
+        ctx.beginPath();
+        ctx.moveTo(vertices[0].x, vertices[0].y);
 
-      // Transform vertices to local coordinates
-      // body.vertices are in world space, so we transform them to local space
-      const localX = vertices[0].x - body.position.x;
-      const localY = vertices[0].y - body.position.y;
-      ctx.moveTo(localX, localY);
+        for (let i = 1; i < vertices.length; i++) {
+          ctx.lineTo(vertices[i].x, vertices[i].y);
+        }
 
-      for (let i = 1; i < vertices.length; i++) {
-        const vx = vertices[i].x - body.position.x;
-        const vy = vertices[i].y - body.position.y;
-        ctx.lineTo(vx, vy);
+        ctx.closePath();
+
+        // Draw filled area with transparency
+        ctx.fill();
+
+        // Draw outline with neon color
+        ctx.stroke();
       }
+    });
 
-      // Close the path
-      ctx.closePath();
-
-      // Draw filled area with transparency
-      ctx.fill();
-
-      // Draw outline with neon color
-      ctx.stroke();
-    }
-
-    // Draw center point (body position)
+    // Draw center point (body position) in world space
     ctx.fillStyle = strokeColor;
     ctx.beginPath();
-    ctx.arc(0, 0, 4, 0, Math.PI * 2);
+    ctx.arc(body.position.x, body.position.y, 4, 0, Math.PI * 2);
     ctx.fill();
 
     // Restore context after each body to prevent state pollution
